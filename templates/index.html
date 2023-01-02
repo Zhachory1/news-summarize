@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>News Summary</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script>
+        function summarize() {
+            const url = document.getElementById("article_url").value;
+            document.getElementById("loading").style.display = "block";
+            fetch("/summarize", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    article_url: url
+                })
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("title").innerText = data.title;
+                    document.getElementById("authors").innerText = data.authors;
+                    document.getElementById("pub_date").innerText = data.pub_date;
+                    document.getElementById("keywords").innerText = data.keywords;
+                    document.getElementById("summary").innerText = data.summary;
+                    var polarity = ""
+                    if (data.polarity > 0) {
+                        document.getElementById("polarity").innerText = "Positive - " + data.polarity
+                    } else if (data.polarity < 0) {
+                        document.getElementById("polarity").innerText = "Negative - " + data.polarity
+                    } else {
+                        document.getElementById("polarity").innerText = "Neutral"
+                    }
+
+                    document.getElementById("results").style.display = "block";
+                });
+        }
+    </script>
+</head>
+
+<body>
+    <div id="input">
+        <form>
+            <p>Put in url of News Article</p>
+            <input id="article_url" name="article_url">
+            <button type="button" onclick="summarize()">Summarize</button>
+        </form>
+    </div>
+    <img id="loading" src="static/loading-gif.gif" alt="Load me daddy" width="100" height="100" hidden>
+    <div id="results" hidden>
+        <h1 id="title"></h1>
+        <h3 id="authors"></h3>
+        <h3 id="pub_date"></h3>
+        <p>Keywords: <span id="keywords"></span></p>
+        <p>Summary: <span id="summary"></span></p>
+        <p>Sentiment: <span id="polarity"></span></p>
+    </div>
+</body>
+
+</html>
