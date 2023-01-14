@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Blueprint
 from flask import render_template
 from flask import request
 from flask import jsonify
@@ -8,13 +8,13 @@ from textblob import TextBlob
 from newspaper import Article
 
 nltk.download('punkt')
-app = Flask(__name__)
+news_summarize = Blueprint("news_summarize", __name__, url_prefix="/")
 
-@app.get("/")
+@news_summarize.get("/")
 def index():
     return render_template('index.html')
 
-@app.post('/summarize')
+@news_summarize.post('/summarize')
 def summarize():
     # You grab data with the request object
     print(request.json)
@@ -44,6 +44,3 @@ def summarize():
         "polarity": analysis.polarity
     }
     return jsonify(data) 
-
-if __name__ == '__main__':
-    app.run()
