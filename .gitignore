@@ -1,4 +1,7 @@
 env/
-bazel-*/**/*
+bazel-bin/
+bazel-news-summarize/
+bazel-out/
+bazel-testlogs/
 .git/
 __pycache__/
