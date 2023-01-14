@@ -1,4 +1,4 @@
 env/
-bazel-*/
+bazel-*/**/*
 .git/
 __pycache__/
