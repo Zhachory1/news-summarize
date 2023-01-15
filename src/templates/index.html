@@ -3,12 +3,12 @@
 
 <head>
     <title>News Summary</title>
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="static/favicon.ico">
     <script>
         function summarize() {
             const url = document.getElementById("article_url").value;
             document.getElementById("loading").style.display = "block";
-            fetch("/summarize", {
+            fetch("summarize", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'

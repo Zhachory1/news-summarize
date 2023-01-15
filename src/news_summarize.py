@@ -8,11 +8,15 @@ from textblob import TextBlob
 from newspaper import Article
 
 nltk.download('punkt')
-news_summarize = Blueprint("news_summarize", __name__, url_prefix="/")
+news_summarize = Blueprint('news_summarize', __name__, url_prefix='/')
+url_path_prefix = '/'
 
-@news_summarize.get("/")
+def set_flags(url_path):
+    url_path_prefix = url_path
+
+@news_summarize.get('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', url_prefix=url_path_prefix)
 
 @news_summarize.post('/summarize')
 def summarize():
@@ -20,7 +24,7 @@ def summarize():
     print(request.json)
     # This brings in the article information. It does not do it 
     # automatically when the instance is created.
-    article = Article(request.json["article_url"])
+    article = Article(request.json['article_url'])
     article.download() 
     # This allows the library to extract all the tasty information from the webpage
     # Like, authors, the text, images, date, and the title
@@ -36,11 +40,11 @@ def summarize():
 
     # TODO(zhach): sometimes authors include all the authors concatenated in [0]
     data = {
-        "title" :   article.title,
-        "authors":   article.authors,
-        "pub_date": article.publish_date,
-        "keywords": article.keywords,
-        "summary":  article.summary,
-        "polarity": analysis.polarity
+        'title' :   article.title,
+        'authors':  article.authors,
+        'pub_date': article.publish_date,
+        'keywords': article.keywords,
+        'summary':  article.summary,
+        'polarity': analysis.polarity
     }
     return jsonify(data) 
