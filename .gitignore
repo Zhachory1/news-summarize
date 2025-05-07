@@ -6,3 +6,5 @@ bazel-testlogs/
 .git/
 __pycache__/
 .vscode
+.venv
+.idx
