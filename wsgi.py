@@ -17,11 +17,11 @@ def main(argv):
     logging.info('env is %s.', FLAGS.env)
     set_flags(FLAGS.url_path)
     if FLAGS.env == 'prod':
-        create_app('src.conf.ProductionConfig').run(host='0.0.0.0')
+        create_app('src.conf.ProductionConfig').run(host='0.0.0.0', port=8080)
     elif FLAGS.env == 'dev':
-        create_app('src.conf.DevelopmentConfig').run(host='0.0.0.0')
+        create_app('src.conf.DevelopmentConfig').run(host='0.0.0.0', port=8080)
     else:
-        create_app('src.conf.TestingConfig').run(host='0.0.0.0')
+        create_app('src.conf.TestingConfig').run(host='0.0.0.0', port=8080)
         
 
 # TODO(zhach): Add flag to switch between dev, prod, and test
