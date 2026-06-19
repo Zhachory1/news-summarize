@@ -8,6 +8,8 @@ try:
         extract_article_data,
         news_summarize,
         normalize_url,
+        validate_article_url,
+        UrlValidationError,
     )
 except ModuleNotFoundError as exc:
     raise unittest.SkipTest(f'project runtime dependency missing: {exc.name}') from exc
@@ -52,7 +54,10 @@ class NewsSummarizeTests(unittest.TestCase):
         self.assertEqual(first, second)
 
     def test_extract_article_data_caches_by_normalized_url(self):
-        with patch('src.news_summarize.ensure_nltk_data'):
+        with patch('src.news_summarize.ensure_nltk_data'), patch(
+            'src.news_summarize.socket.getaddrinfo',
+            return_value=[(None, None, None, None, ('93.184.216.34', 0))],
+        ):
             first = extract_article_data(
                 'https://example.com/story?id=7&utm_source=x',
                 article_cls=FakeArticle,
@@ -74,7 +79,17 @@ class NewsSummarizeTests(unittest.TestCase):
         response = self.app().test_client().post('/summarize', json={})
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.get_json()['error'], 'article_url is required')
+        self.assertEqual(response.get_json()['error']['code'], 'missing_article_url')
+
+    def test_validate_article_url_blocks_localhost(self):
+        with self.assertRaises(UrlValidationError):
+            validate_article_url('http://localhost:8000/story')
+
+    def test_summarize_route_returns_structured_url_error(self):
+        response = self.app().test_client().post('/summarize', json={'article_url': 'file:///etc/passwd'})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.get_json()['error']['code'], 'invalid_article_url')
 
     def test_summarize_route_returns_extracted_data(self):
         with patch('src.news_summarize.extract_article_data', return_value={'title': 'T'}):

@@ -1,12 +1,11 @@
-#!/bin/sh
-if [[ -z "${VIRTUAL_ENV+x}" ]] ; then
-    python -m venv .venv
-    source .venv/bin/activate
-    pip install -r third_party/requirements.txt
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "${VIRTUAL_ENV:-}" ]]; then
+  python3 -m venv .venv
+  # shellcheck disable=SC1091
+  source .venv/bin/activate
+  pip install -r third_party/requirements.txt
 fi
 
-if [[ $# -eq 0 ]] ; then
-    python wsgi.py 
-else
-    python wsgi.py $@
-fi
+python wsgi.py "$@"
