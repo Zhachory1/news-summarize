@@ -8,6 +8,7 @@
         function summarize() {
             const url = document.getElementById("article_url").value;
             document.getElementById("loading").style.display = "block";
+            document.getElementById("error").innerText = "";
             fetch("summarize", {
                 method: "POST",
                 headers: {
@@ -17,7 +18,13 @@
                     article_url: url
                 })
             })
-                .then((response) => response.json())
+                .then(async (response) => {
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.error?.message || "Failed to summarize article");
+                    }
+                    return data;
+                })
                 .then((data) => {
                     document.getElementById("loading").style.display = "none";
                     document.getElementById("title").innerText = data.title;
@@ -35,6 +42,11 @@
                     }
 
                     document.getElementById("results").style.display = "block";
+                })
+                .catch((error) => {
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("results").style.display = "none";
+                    document.getElementById("error").innerText = error.message;
                 });
         }
     </script>
@@ -48,7 +60,8 @@
             <button type="button" onclick="summarize()">Summarize</button>
         </form>
     </div>
-    <img id="loading" src="static/loading-gif.gif" alt="Load me daddy" width="100" height="100" hidden>
+    <p id="error" style="color: red;"></p>
+    <img id="loading" src="static/loading-gif.gif" alt="Loading" width="100" height="100" hidden>
     <div id="results" hidden>
         <h1 id="title"></h1>
         <h3 id="authors"></h3>
