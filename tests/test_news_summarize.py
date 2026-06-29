@@ -75,6 +75,14 @@ class NewsSummarizeTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
 
+    def test_index_route_renders_accessible_form_state(self):
+        response = self.app().test_client().get('/')
+
+        self.assertIn(b'onsubmit="summarize(); return false;"', response.data)
+        self.assertIn(b'id="summarize_button" type="submit"', response.data)
+        self.assertIn(b'role="alert"', response.data)
+        self.assertIn(b'aria-live="polite"', response.data)
+
     def test_summarize_requires_article_url(self):
         response = self.app().test_client().post('/summarize', json={})
 

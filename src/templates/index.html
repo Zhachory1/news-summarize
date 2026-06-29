@@ -6,13 +6,24 @@
     <link rel="icon" type="image/x-icon" href="static/favicon.ico">
     <script>
         function summarize() {
-            const url = document.getElementById("article_url").value;
-            document.getElementById("loading").style.display = "block";
-            document.getElementById("error").innerText = "";
+            const url = document.getElementById("article_url").value.trim();
+            const loading = document.getElementById("loading");
+            const button = document.getElementById("summarize_button");
+            const error = document.getElementById("error");
+            const results = document.getElementById("results");
+            if (!url) {
+                error.innerText = "Article URL is required";
+                results.hidden = true;
+                return;
+            }
+
+            loading.hidden = false;
+            button.disabled = true;
+            error.innerText = "";
             fetch("summarize", {
                 method: "POST",
                 headers: {
-                    'Content-Type': 'application/json'
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
                     article_url: url
@@ -26,27 +37,27 @@
                     return data;
                 })
                 .then((data) => {
-                    document.getElementById("loading").style.display = "none";
-                    document.getElementById("title").innerText = data.title;
-                    document.getElementById("authors").innerText = data.authors;
-                    document.getElementById("pub_date").innerText = data.pub_date;
-                    document.getElementById("keywords").innerText = data.keywords;
-                    document.getElementById("summary").innerText = data.summary;
-                    var polarity = ""
+                    document.getElementById("title").innerText = data.title || "";
+                    document.getElementById("authors").innerText = Array.isArray(data.authors) ? data.authors.join(", ") : (data.authors || "");
+                    document.getElementById("pub_date").innerText = data.pub_date || "";
+                    document.getElementById("keywords").innerText = Array.isArray(data.keywords) ? data.keywords.join(", ") : (data.keywords || "");
+                    document.getElementById("summary").innerText = data.summary || "";
                     if (data.polarity > 0) {
-                        document.getElementById("polarity").innerText = "Positive - " + data.polarity
+                        document.getElementById("polarity").innerText = "Positive - " + data.polarity;
                     } else if (data.polarity < 0) {
-                        document.getElementById("polarity").innerText = "Negative - " + data.polarity
+                        document.getElementById("polarity").innerText = "Negative - " + data.polarity;
                     } else {
-                        document.getElementById("polarity").innerText = "Neutral"
+                        document.getElementById("polarity").innerText = "Neutral";
                     }
-
-                    document.getElementById("results").style.display = "block";
+                    results.hidden = false;
                 })
-                .catch((error) => {
-                    document.getElementById("loading").style.display = "none";
-                    document.getElementById("results").style.display = "none";
-                    document.getElementById("error").innerText = error.message;
+                .catch((caughtError) => {
+                    results.hidden = true;
+                    error.innerText = caughtError.message;
+                })
+                .finally(() => {
+                    loading.hidden = true;
+                    button.disabled = false;
                 });
         }
     </script>
@@ -54,15 +65,15 @@
 
 <body>
     <div id="input">
-        <form>
-            <p>Put in url of News Article</p>
-            <input id="article_url" name="article_url">
-            <button type="button" onclick="summarize()">Summarize</button>
+        <form onsubmit="summarize(); return false;">
+            <label for="article_url">News article URL</label>
+            <input id="article_url" name="article_url" type="url" required>
+            <button id="summarize_button" type="submit">Summarize</button>
         </form>
     </div>
-    <p id="error" style="color: red;"></p>
-    <img id="loading" src="static/loading-gif.gif" alt="Loading" width="100" height="100" hidden>
-    <div id="results" hidden>
+    <p id="error" role="alert" style="color: red;"></p>
+    <img id="loading" src="static/loading-gif.gif" alt="Loading" width="100" height="100" role="status" hidden>
+    <div id="results" aria-live="polite" hidden>
         <h1 id="title"></h1>
         <h3 id="authors"></h3>
         <h3 id="pub_date"></h3>
