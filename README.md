@@ -10,6 +10,13 @@ $ alias please="bazel"
 $ please run src:wsgi
 ```
 
+## Local setup
+
+```bash
+pip install -r third_party/requirements.txt
+python -m nltk.downloader punkt
+```
+
 ## Docker
 
 ```bash

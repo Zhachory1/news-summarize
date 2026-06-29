@@ -32,6 +32,10 @@ class UrlValidationError(ValueError):
     pass
 
 
+class NltkDataError(RuntimeError):
+    pass
+
+
 def set_flags(url_path):
     global url_path_prefix
     url_path_prefix = url_path
@@ -70,8 +74,8 @@ def normalize_url(url):
 def ensure_nltk_data():
     try:
         nltk.data.find('tokenizers/punkt')
-    except LookupError:
-        nltk.download('punkt', quiet=True)
+    except LookupError as exc:
+        raise NltkDataError('Missing NLTK punkt data. Install it with: python -m nltk.downloader punkt') from exc
 
 
 def clear_article_cache():
@@ -116,5 +120,7 @@ def summarize():
         return jsonify(extract_article_data(article_url))
     except UrlValidationError as exc:
         return jsonify({'error': {'code': 'invalid_article_url', 'message': str(exc)}}), 400
+    except NltkDataError as exc:
+        return jsonify({'error': {'code': 'missing_nltk_data', 'message': str(exc)}}), 500
     except Exception as exc:
         return jsonify({'error': {'code': 'article_extraction_failed', 'message': str(exc)}}), 502
