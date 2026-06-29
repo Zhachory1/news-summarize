@@ -9,11 +9,6 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 EXPOSE 8080
 
-RUN apt-get update \
- && apt-get install
-
-RUN pip install -r requirements.txt
-
 COPY . .
 
 CMD ["python", "wsgi.py"]
