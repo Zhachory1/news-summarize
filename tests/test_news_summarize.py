@@ -8,6 +8,7 @@ try:
         extract_article_data,
         news_summarize,
         normalize_url,
+        set_flags,
         validate_article_url,
         UrlValidationError,
     )
@@ -40,6 +41,7 @@ class FakeArticle:
 class NewsSummarizeTests(unittest.TestCase):
     def setUp(self):
         clear_article_cache()
+        set_flags('/')
         FakeArticle.calls = 0
 
     def app(self):
@@ -74,6 +76,16 @@ class NewsSummarizeTests(unittest.TestCase):
         response = self.app().test_client().get('/')
 
         self.assertEqual(response.status_code, 200)
+
+    def test_index_route_uses_normalized_url_prefix_for_frontend_urls(self):
+        set_flags('news')
+
+        response = self.app().test_client().get('/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'href="/news/static/favicon.ico"', response.data)
+        self.assertIn(b'const summarizeUrl = "/news/summarize";', response.data)
+        self.assertIn(b'src="/news/static/loading-gif.gif"', response.data)
 
     def test_summarize_requires_article_url(self):
         response = self.app().test_client().post('/summarize', json={})
