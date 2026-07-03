@@ -10,6 +10,13 @@ $ alias please="bazel"
 $ please run src:wsgi
 ```
 
+## Docker
+
+```bash
+docker build -f dockerfile -t news-summarize .
+docker run --rm -p 8080:8080 news-summarize
+```
+
 ## Tests
 
 ```bash
