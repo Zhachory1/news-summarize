@@ -6,6 +6,7 @@ if [[ -z "${VIRTUAL_ENV:-}" ]]; then
   # shellcheck disable=SC1091
   source .venv/bin/activate
   pip install -r third_party/requirements.txt
+  python -m nltk.downloader punkt
 fi
 
 python wsgi.py "$@"
