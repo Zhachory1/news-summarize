@@ -38,7 +38,12 @@ class NltkDataError(RuntimeError):
 
 def set_flags(url_path):
     global url_path_prefix
-    url_path_prefix = url_path
+    prefix = url_path or '/'
+    if not prefix.startswith('/'):
+        prefix = '/' + prefix
+    if not prefix.endswith('/'):
+        prefix += '/'
+    url_path_prefix = prefix
 
 
 def validate_article_url(url):
