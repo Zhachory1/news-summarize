@@ -3,8 +3,10 @@
 
 <head>
     <title>News Summary</title>
-    <link rel="icon" type="image/x-icon" href="static/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="{{ url_prefix }}static/favicon.ico">
     <script>
+        const summarizeUrl = "{{ url_prefix }}summarize";
+
         function summarize() {
             const url = document.getElementById("article_url").value.trim();
             const loading = document.getElementById("loading");
@@ -20,7 +22,7 @@
             loading.hidden = false;
             button.disabled = true;
             error.innerText = "";
-            fetch("summarize", {
+            fetch(summarizeUrl, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -72,7 +74,7 @@
         </form>
     </div>
     <p id="error" role="alert" style="color: red;"></p>
-    <img id="loading" src="static/loading-gif.gif" alt="Loading" width="100" height="100" role="status" hidden>
+    <img id="loading" src="{{ url_prefix }}static/loading-gif.gif" alt="Loading" width="100" height="100" role="status" hidden>
     <div id="results" aria-live="polite" hidden>
         <h1 id="title"></h1>
         <h3 id="authors"></h3>

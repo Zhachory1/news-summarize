@@ -5,14 +5,10 @@ WORKDIR /app
 COPY third_party/requirements.txt ./
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    python -m nltk.downloader punkt
 
 EXPOSE 8080
-
-RUN apt-get update \
- && apt-get install
-
-RUN pip install -r requirements.txt
 
 COPY . .
 

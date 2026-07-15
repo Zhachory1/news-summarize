@@ -4,12 +4,14 @@ from unittest.mock import patch
 try:
     from flask import Flask
     from src.news_summarize import (
+        NltkDataError,
+        UrlValidationError,
         clear_article_cache,
         extract_article_data,
         news_summarize,
         normalize_url,
+        set_flags,
         validate_article_url,
-        UrlValidationError,
     )
 except ModuleNotFoundError as exc:
     raise unittest.SkipTest(f'project runtime dependency missing: {exc.name}') from exc
@@ -40,6 +42,7 @@ class FakeArticle:
 class NewsSummarizeTests(unittest.TestCase):
     def setUp(self):
         clear_article_cache()
+        set_flags('/')
         FakeArticle.calls = 0
 
     def app(self):
@@ -83,6 +86,16 @@ class NewsSummarizeTests(unittest.TestCase):
         self.assertIn(b'role="alert"', response.data)
         self.assertIn(b'aria-live="polite"', response.data)
 
+    def test_index_route_uses_normalized_url_prefix_for_frontend_urls(self):
+        set_flags('news')
+
+        response = self.app().test_client().get('/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'href="/news/static/favicon.ico"', response.data)
+        self.assertIn(b'const summarizeUrl = "/news/summarize";', response.data)
+        self.assertIn(b'src="/news/static/loading-gif.gif"', response.data)
+
     def test_summarize_requires_article_url(self):
         response = self.app().test_client().post('/summarize', json={})
 
@@ -98,6 +111,16 @@ class NewsSummarizeTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.get_json()['error']['code'], 'invalid_article_url')
+
+    def test_summarize_route_returns_missing_nltk_data_error(self):
+        with patch('src.news_summarize.extract_article_data', side_effect=NltkDataError('install punkt')):
+            response = self.app().test_client().post(
+                '/summarize',
+                json={'article_url': 'https://example.com/story'},
+            )
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.get_json()['error']['code'], 'missing_nltk_data')
 
     def test_summarize_route_returns_extracted_data(self):
         with patch('src.news_summarize.extract_article_data', return_value={'title': 'T'}):
